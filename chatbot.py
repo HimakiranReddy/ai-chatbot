@@ -1,5 +1,5 @@
 import streamlit as st
-from PyPDF2 import PdfReader
+import pdfplumber  # Replacing PyPDF2
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
@@ -19,12 +19,11 @@ with st.sidebar:
 
 # If a file is uploaded
 if uploaded_file:
-    # Read the PDF
-    pdf_reader = PdfReader(uploaded_file)
+    # Read the PDF with pdfplumber
     text = ""
-    for page in pdf_reader.pages:
-        if page.extract_text():
-            text += page.extract_text() + "\n"
+    with pdfplumber.open(uploaded_file) as pdf:
+        for page in pdf.pages:
+            text += page.extract_text() + "\n" if page.extract_text() else ""
 
     # Display file name
     st.sidebar.success(f"✅ File uploaded: {uploaded_file.name}")
